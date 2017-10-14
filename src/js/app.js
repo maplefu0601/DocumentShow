@@ -38,91 +38,104 @@ class Text {
 
 }
 
-function getDocument(docid) {
-	
-	if(!window.userAuthed) {
-		showLogin(true);
-	} else {
-		showLogin(false);
-		sendRequest(docid);
+class Doc {
+	constructor() {}
+
+	getDocument(docid) {
+		
+		if(!window.userAuthed) {
+			this.showLogin(true);
+		} else {
+			this.showLogin(false);
+			request.sendRequest(docid);
+		}
 	}
-}
 
-function showLogin(show) {
-	document.querySelector('#user').style.display = show?'block':'none';
-}
-
-function sendRequest(docid) {
-	let obj = {};
-	obj.method = "GET";
-	obj.query = '/documents/' + docid;
-
-	console.log(httpRequest);
-	if(httpRequest) {
-		httpRequest.request(obj)
-			.then(data => {
-				data = JSON.parse(data);
-				if(data.success) {
-					window.userAuthed = true;
-					showDocument(data.doc);
-				} else {
-					showErrorUser(data.error);
-				}
-			}).catch(error => {
-				console.log(error);
-				document.body.innerHTML = error;
-			});
+	showLogin(show) {
+		document.querySelector('#user').style.display = show?'block':'none';
 	}
-}
 
-function checkUser(form) {
-	let obj = {};
-	obj.method = "POST";
-	obj.query = '/user';
-	obj.body = 'username='+form.username.value+'&password='+form.password.value;
-
-	console.log(httpRequest);
-	if(httpRequest) {
-		httpRequest.request(obj)
-			.then(data => {
-				data = JSON.parse(data);
-				if(data.success) {
-					window.userAuthed = true;
-					showLogin(false);
-				} else {
-					showErrorUser(data.error);
-				}
-			}).catch(error => {
-				console.log(error);
-				document.body.innerHTML = error;
-			});
+	showDocument(doc) {
+		console.log('login success.');
+		this.showLogin(false);
+		let contentDiv = document.querySelector('#content');
+		if(contentDiv) {
+			contentDiv.innerHTML = doc;
+			contentDiv.innerHTMLBAK = doc;
+		}
 	}
-}
 
-function showDocument(doc) {
-	console.log('login success.');
-	showLogin(false);
-	let contentDiv = document.querySelector('#content');
-	if(contentDiv) {
-		contentDiv.innerHTML = doc;
-		contentDiv.innerHTMLBAK = doc;
+	showErrorUser(error) {
+		console.log('error:'+error);
+		alert(error);
 	}
+
+
 }
 
-function showErrorUser(error) {
-	console.log('error:'+error);
-	alert(error);
+class Request {
+	constructor() {}
+
+	sendRequest(docid) {
+		let obj = {};
+		obj.method = "GET";
+		obj.query = '/documents/' + docid;
+
+		console.log(httpRequest);
+		if(httpRequest) {
+			httpRequest.request(obj)
+				.then(data => {
+					data = JSON.parse(data);
+					if(data.success) {
+						window.userAuthed = true;
+						doc.showDocument(data.doc);
+					} else {
+						showErrorUser(data.error);
+					}
+				}).catch(error => {
+					console.log(error);
+					document.body.innerHTML = error;
+				});
+		}
+	}
+
+	checkUser(form) {
+		let obj = {};
+		obj.method = "POST";
+		obj.query = '/user';
+		obj.body = 'username='+form.username.value+'&password='+form.password.value;
+
+		console.log(httpRequest);
+		if(httpRequest) {
+			httpRequest.request(obj)
+				.then(data => {
+					data = JSON.parse(data);
+					if(data.success) {
+						window.userAuthed = true;
+						doc.showLogin(false);
+					} else {
+						doc.showErrorUser(data.error);
+					}
+				}).catch(error => {
+					console.log(error);
+					document.body.innerHTML = error;
+				});
+		}
+	}
+
 }
 
 let text = new Text();
+let doc = new Doc();
+let request = new Request();
 window.onload = () => {
 	let authBtn = document.querySelector('#authBtn');
 	if(authBtn) {
-		authBtn.addEventListener('click', (event) => {checkUser(document.forms.login)});
+		authBtn.addEventListener('click', (event) => {request.checkUser(document.forms.login)});
 	}
 	let getDocBtn = document.querySelector('#getDocBtn');
 	if(getDocBtn) {
-		getDocBtn.addEventListener('click', (event) => { getDocument(document.getElementsByName('docid')[0].value);});
+		getDocBtn.addEventListener('click', (event) => { doc.getDocument(document.getElementsByName('docid')[0].value);});
 	}
 	let content = document.querySelector('#content');
 	if(content) {
