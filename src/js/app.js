@@ -1,60 +1,45 @@
 'use strict';
 
-import Message from "./components/message";
 import {httpRequest} from "./components/httpRequest.js";
 
 window.userAuthed = false;
-window.onload = () => {
-	let authBtn = document.querySelector('#authBtn');
-	if(authBtn) {
-		authBtn.addEventListener('click', (event) => {checkUser(document.forms.login)});
+
+
+class Text {
+	constructor() {}
+	getSelectedText() {
+		var text = "";
+	    if (typeof window.getSelection != "undefined") {
+	        text = window.getSelection().toString();
+	    } else if (typeof document.selection != "undefined" && document.selection.type == "Text") {
+	        text = document.selection.createRange().text;
+	    }
+	    return text;
 	}
-	let getDocBtn = document.querySelector('#getDocBtn');
-	if(getDocBtn) {
-		getDocBtn.addEventListener('click', (event) => { getDocument(document.getElementsByName('docid')[0].value);});
+	doSelectedText() {
+		let selectedText = this.getSelectedText();
+		if(selectedText) {
+			console.log('selected '+selectedText);
+			this.highLightText(selectedText);
+		}
 	}
-	let content = document.querySelector('#content');
-	if(content) {
-		content.addEventListener('mouseup', () => { doSelectedText(); });
+	highLightText(word) {
+		
+		document.querySelector('#content').innerHTML = document.querySelector('#content').innerHTMLBAK;
+		var query = new RegExp("(\\b" + word + "\\b)", "gim");
+	    var str = document.querySelector('#content').innerHTML;
+	    var enew = str.replace(/(<span class='highlight'>|<\/span>)/igm, "");
+	    document.querySelector('#content').innerHTML = enew;
+	    var newe = enew.replace(query, "<span class='highlight'>$1</span>");
+	    document.querySelector('#content').innerHTML = newe;
+
+		//console.log(document.querySelector('#content').innerHTML);
 	}
 
-};
-
-window.addEventListener('hashchange', function(e) {alert(e)}, false);
-
-function getSelectedText() {
-    var text = "";
-    if (typeof window.getSelection != "undefined") {
-        text = window.getSelection().toString();
-    } else if (typeof document.selection != "undefined" && document.selection.type == "Text") {
-        text = document.selection.createRange().text;
-    }
-    return text;
-}
-
-function doSelectedText() {
-	let selectedText = getSelectedText();
-	if(selectedText) {
-		console.log('selected '+selectedText);
-		highLightText(selectedText);
-	}
-}
-
-function highLightText(word) {
-	
-	document.querySelector('#content').innerHTML = document.querySelector('#content').innerHTMLBAK;
-	var query = new RegExp("(\\b" + word + "\\b)", "gim");
-    var str = document.querySelector('#content').innerHTML;
-    var enew = str.replace(/(<span class='highlight'>|<\/span>)/igm, "");
-    document.querySelector('#content').innerHTML = enew;
-    var newe = enew.replace(query, "<span class='highlight'>$1</span>");
-    document.querySelector('#content').innerHTML = newe;
-
-	console.log(document.querySelector('#content').innerHTML);
 }
 
 function getDocument(docid) {
-	console.log(window.location);
+	
 	if(!window.userAuthed) {
 		showLogin(true);
 	} else {
@@ -128,3 +113,22 @@ function showErrorUser(error) {
 	console.log('error:'+error);
 	alert(error);
 }
+
+let text = new Text();
+window.onload = () => {
+	let authBtn = document.querySelector('#authBtn');
+	if(authBtn) {
+		authBtn.addEventListener('click', (event) => {checkUser(document.forms.login)});
+	}
+	let getDocBtn = document.querySelector('#getDocBtn');
+	if(getDocBtn) {
+		getDocBtn.addEventListener('click', (event) => { getDocument(document.getElementsByName('docid')[0].value);});
+	}
+	let content = document.querySelector('#content');
+	if(content) {
+		content.addEventListener('mouseup', () => { text.doSelectedText(); });
+	}
+
+};
+
+window.addEventListener('hashchange', function(e) {alert(e)}, false);

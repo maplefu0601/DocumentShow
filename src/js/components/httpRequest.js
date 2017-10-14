@@ -5,9 +5,9 @@ class HttpRequest {
 		this.url = "";
 	}
 
-	request(obj) {console.log(obj);
+	request(obj) {
 		return new Promise((resolve, reject) => {
-	        let xhr = new XMLHttpRequest();console.log(1);
+	        let xhr = new XMLHttpRequest();
 
 	        if(obj.query) {
 	        	this.url = this.baseUrl + obj.query;
